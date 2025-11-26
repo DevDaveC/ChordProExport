@@ -3,8 +3,11 @@ import MuseScore 3.0;
 
 MuseScore {
     title: "Chord Pro Export"
+    version: "0.1"
     description: "This plugin exports chord pro format from the score"
     menuPath: "Plugins.Chord Pro Export"
+
+    requiresScore: true
 
     onRun: {
         var cursor = curScore.newCursor();
@@ -41,10 +44,10 @@ MuseScore {
                     cursor.rewind(Cursor.SCORE_START);
                     while (cursor.segment && (cursor.tick < endTick)) {
                         
-                        if (cursor.element && cursor.element.type == Element.CHORD) {
+                        if (cursor.element && cursor.element.type === Element.CHORD) {
                             if (cursor.segment.annotations && 
                                 cursor.segment.annotations.length > 0 &&
-                                cursor.segment.annotations[0].name == "Harmony") {
+                                cursor.segment.annotations[0].name === "Harmony") {
                                 hasChords = true;
                             }
                         
@@ -100,7 +103,7 @@ MuseScore {
                     if (cursor.segment.annotations && 
                         cursor.segment.annotations.length > 0) {
 
-                        if (cursor.segment.annotations[0].name == "Harmony") {
+                        if (cursor.segment.annotations[0].name === "Harmony") {
                             chordSheetItems.push("[" + cursor.segment.annotations[0].text + "]");
                         }
                         const sectionMatch = /verse\s?\d+|intro|chorus\s?\d+|bridge|outro/ig.test(cursor.segment.annotations[0].text);
@@ -108,12 +111,12 @@ MuseScore {
                             chordSheetItems.push("\n\n" + cursor.segment.annotations[0].text + "\n"); // THIS could setup section wrapping?
                         }
                     }
-                    if (cursor.element && cursor.element.type == Element.CHORD) {
+                    if (cursor.element && cursor.element.type === Element.CHORD) {
                         var lyrics = cursor.element.lyrics;
                         if (lyrics && lyrics.length > 0) {
                             // TODO Check multi verse handling, I suspect this is wrong
                             const all = lyrics.map(l => {
-                                    const noSpace = l.syllabic==Lyrics.BEGIN || l.syllabic==Lyrics.MIDDLE
+                                    const noSpace = l.syllabic === Lyrics.BEGIN || l.syllabic === Lyrics.MIDDLE
                                     return l.text + (noSpace ? "" : " ");
                                 }).join(" "); // TODO: should this be space or not?
                             chordSheetItems.push(all);
@@ -144,23 +147,23 @@ MuseScore {
         metadata.composer = curScore.composer;
         metadata.lyricist = curScore.lyricist;
         const keysigMap = {
-            0: "C",
-            1: "G",
-            2: "D",
-            3: "A",
-            4: "E",
-            5: "B",
-            6: "F#",
-            7: "C#",
-            -1: "F",
-            -2: "Bb",
-            -3: "Eb",
-            -4: "Ab",
-            -5: "Db",
-            -6: "Gb",
-            -7: "Cb"
+           "0": "C",
+           "1": "G",
+           "2": "D",
+           "3": "A",
+           "4": "E",
+           "5": "B",
+           "6": "F#",
+           "7": "C#",
+           "-1": "F",
+           "-2": "Bb",
+           "-3": "Eb",
+           "-4": "Ab",
+           "-5": "Db",
+           "-6": "Gb",
+           "-7": "Cb"
         };
-        metadata.key = keysigMap[curScore.keysig];
+        metadata.key = keysigMap[curScore.keysig.toString()];
         
 
         console.log("Extracted Metadata:", metadata);
@@ -192,7 +195,7 @@ MuseScore {
             return;
         }
 
-        textEdit.text = data;
+        textEdit.text = text;
         textEdit.selectAll();
         textEdit.copy();
         console.log("Data copied to clipboard.");
