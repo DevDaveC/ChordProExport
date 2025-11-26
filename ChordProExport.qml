@@ -100,15 +100,18 @@ MuseScore {
                 cursor.staffIdx = staff; //TODO: ability to chose staff with a UI
                 cursor.rewind(Cursor.SCORE_START);
                 while (cursor.segment && (cursor.tick < endTick)) {
-                    if (cursor.segment.annotations && 
-                        cursor.segment.annotations.length > 0) {
+                    if (cursor.segment.annotations && cursor.segment.annotations.length > 0) {
 
-                        if (cursor.segment.annotations[0].name === "Harmony") {
-                            chordSheetItems.push("[" + cursor.segment.annotations[0].text + "]");
+                        const sectionAnnotation = cursor.segment.annotations.find(ann => {
+                            return /verse\s?\d+|intro|chorus\s?\d+|bridge|outro/ig.test(ann.text); //TODO: expand as needed
+                        });
+                        if (sectionAnnotation) {
+                            chordSheetItems.push("\n\n" + sectionAnnotation.text + "\n"); // THIS could setup section wrapping?
                         }
-                        const sectionMatch = /verse\s?\d+|intro|chorus\s?\d+|bridge|outro/ig.test(cursor.segment.annotations[0].text);
-                        if (sectionMatch) {
-                            chordSheetItems.push("\n\n" + cursor.segment.annotations[0].text + "\n"); // THIS could setup section wrapping?
+
+                        const chordAnnotation = cursor.segment.annotations.find(ann => ann.name === "Harmony");
+                        if (chordAnnotation) {
+                            chordSheetItems.push("[" + chordAnnotation.text + "]");
                         }
                     }
                     if (cursor.element && cursor.element.type === Element.CHORD) {
