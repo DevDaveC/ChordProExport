@@ -2,9 +2,9 @@ import QtQuick;
 import MuseScore 3.0;
 
 MuseScore {
-    title: "Extract Chord Pro"
-    description: "This plugin extracts chord pro format from the score"
-    menuPath: "Plugins.Extract Chord Pro"
+    title: "Chord Pro Export"
+    description: "This plugin exports chord pro format from the score"
+    menuPath: "Plugins.Chord Pro Export"
 
     onRun: {
         var cursor = curScore.newCursor();
