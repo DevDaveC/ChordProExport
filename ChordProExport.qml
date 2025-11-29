@@ -261,6 +261,7 @@ MuseScore {
         var fullLyrics = "";
         let prevousSyllabic = null;
         let prevousSyllabicInfo = null;
+        let lastSyllabComplete = true;
         
         for (var i = 0; i < sequence.length; i++) {
             var item = sequence[i];
@@ -269,6 +270,7 @@ MuseScore {
 
             // Iterate through all segments in the measure
             var seg = m.firstSegment;
+            let previousElement = null;
             while (seg) {
                  if (seg.annotations && seg.annotations.length > 0) {
 
@@ -294,6 +296,10 @@ MuseScore {
                         cursor.rewindToTick(seg.tick);
 
                         var element = cursor.element;
+                        if (previousElement && previousElement.tick + previousElement.duration.ticks > element.tick) {
+                            continue; // Skip processing if same element as before
+                        }
+                        previousElement = element;
                         if (element && element.type === Element.CHORD) {
 
                             // Lyrics are stored in the 'lyrics' property of a Chord
@@ -308,6 +314,7 @@ MuseScore {
                                     // formatting: add a space after the syllable
                                     const noSpace = lyric.syllabic === Lyrics.BEGIN || lyric.syllabic === Lyrics.MIDDLE;
                                     fullLyrics += lyric.text + (noSpace ? "" : " ");
+                                    lastSyllabComplete = !(noSpace);
 
                                     if (lyric.text === prevousSyllabic) {
                                         console.log("Debug: Found '" + prevousSyllabic + "' lyric " + prevousSyllabicInfo);
@@ -338,16 +345,16 @@ MuseScore {
                 var nextM = sequence[i+1].measure;
                 
                 // Check for non-linear jump (Repeat/Da Capo)
-                if (m.nextMeasure !== nextM) {
+                if (m.nextMeasure?.tick !== nextM.measure?.tick) {
                     addNewLine = true;
                 }
                 // Check for automatic system break (Visual wrapping)
-                else if (m.system !== nextM.system) {
-                    addNewLine = true;
-                }
+                // else if (m.system !== nextM.system) {
+                //     addNewLine = true;
+                // }
             }
 
-            if (addNewLine) {
+            if (addNewLine && lastSyllabComplete) {
                 fullLyrics += "\n";
             }
         }
